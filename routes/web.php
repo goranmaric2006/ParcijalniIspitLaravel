@@ -4,10 +4,10 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TodoController;
 use Illuminate\Support\Facades\Route;
 
+// Redirect root URL to login
 Route::get('/', function () {
-    return view('welcome');
+    return redirect('/login');
 });
-
 
 Route::middleware('auth')->group(function () {
     Route::get('/todos', [TodoController::class, 'index'])->name('todos.index');
@@ -17,7 +17,6 @@ Route::middleware('auth')->group(function () {
     Route::put('/todos/{todo}', [TodoController::class, 'update'])->name('todos.update');
     Route::delete('/todos/{todo}', [TodoController::class, 'destroy'])->name('todos.destroy');
 });
-
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -29,4 +28,5 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+// Include authentication routes
 require __DIR__.'/auth.php';

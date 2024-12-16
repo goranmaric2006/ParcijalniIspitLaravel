@@ -1,0 +1,54 @@
+name: Laravel CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  # Job to set up the environment, install dependencies, and run tests
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up PHP
+      - name: Set up PHP 8.1
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.1
+          extensions: mbstring, bcmath, intl, xml
+
+      # Step 3: Install Composer
+      - name: Install Composer
+        run: |
+          curl -sS https://getcomposer.org/installer | php
+          mv composer.phar /usr/local/bin/composer
+
+      # Step 4: Install PHP dependencies with Composer
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      # Step 5: Run Laravel migrations (optional, for database tests)
+      - name: Run migrations
+        run: php artisan migrate --env=testing
+
+      # Step 6: Run tests
+      - name: Run tests
+        run: ./vendor/bin/phpunit --env=testing --coverage-text
+
+      # Step 7: Cache dependencies (optional, speeds up subsequent runs)
+      - name: Cache Composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.composer/cache
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
