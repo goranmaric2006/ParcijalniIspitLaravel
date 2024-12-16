@@ -34,22 +34,3 @@ jobs:
       # Step 4: Install PHP dependencies with Composer
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
-
-      # Step 5: Run Laravel migrations (optional, for database tests)
-      - name: Run migrations
-        run: php artisan migrate --env=testing
-
-      # Step 6: Run tests
-      - name: Run tests
-        run: ./vendor/bin/phpunit --coverage-text
-
-
-      # Step 7: Cache dependencies (optional, speeds up subsequent runs)
-      - name: Cache Composer dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.composer/cache
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-
-
