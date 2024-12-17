@@ -3,12 +3,12 @@ name: Deploy Laravel App to Ubuntu Server
 on:
   push:
     branches:
-      - main  # Trigger deploy only on push to main branch
+      - main  # Trigger deploy only on push to the main branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -16,28 +16,32 @@ jobs:
     - name: Set up PHP
       uses: shivammathur/setup-php@v2
       with:
-        php-version: '8.3'
+        php-version: '8.3' # Ensure it matches your app's requirements
         extensions: mbstring, xml, curl, zip, bcmath
         coverage: none
 
-    - name: Install Composer dependencies
+    - name: Install Composer
       run: |
         curl -sS https://getcomposer.org/installer | php
-        php composer.phar install --no-interaction --prefer-dist
+        sudo mv composer.phar /usr/local/bin/composer
+
+    - name: Install Composer dependencies
+      run: composer install --no-interaction --prefer-dist
+
+    - name: Install sshpass
+      run: sudo apt-get update && sudo apt-get install -y sshpass
 
     - name: Deploy to server
       env:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        SERVER_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
       run: |
-        echo "$SSH_PRIVATE_KEY" > private_key.pem
-        chmod 600 private_key.pem
-        ssh -o StrictHostKeyChecking=no -i private_key.pem root@138.68.103.128 <<EOF
-          cd var/www/html/app/
+        sshpass -p "$SERVER_PASSWORD" ssh -o StrictHostKeyChecking=no root@138.68.103.128 <<EOF
+          cd /var/www/html/app/
           git pull origin main
           composer install --no-interaction --prefer-dist
           php artisan migrate --force
           php artisan config:cache
           php artisan route:cache
           php artisan view:cache
-          sudo systemctl restart nginx  # or restart your web server
+          sudo systemctl restart nginx
         EOF
