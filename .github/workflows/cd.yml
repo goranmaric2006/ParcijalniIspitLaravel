@@ -1,31 +1,43 @@
-name: Deploy Laravel Application
+name: Deploy Laravel App to Ubuntu Server
 
 on:
   push:
     branches:
-      - main 
+      - main  # Trigger deploy only on push to main branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment:
-      name: production
-
+    
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v2
 
+    - name: Set up PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'
+        extensions: mbstring, xml, curl, zip, bcmath
+        coverage: none
 
-      - name: Set up PHP 8.3
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: 8.3
-          extensions: mbstring, bcmath, intl, xml
+    - name: Install Composer dependencies
+      run: |
+        curl -sS https://getcomposer.org/installer | php
+        php composer.phar install --no-interaction --prefer-dist
 
-      - name: Install Composer
-        run: |
-          curl -sS https://getcomposer.org/installer | php
-          mv composer.phar /usr/local/bin/composer
-
-      - name: Install dependencies
-        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+    - name: Deploy to server
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      run: |
+        echo "$SSH_PRIVATE_KEY" > private_key.pem
+        chmod 600 private_key.pem
+        ssh -o StrictHostKeyChecking=no -i private_key.pem root@138.68.103.128 <<EOF
+          cd var/www/html/app/
+          git pull origin main
+          composer install --no-interaction --prefer-dist
+          php artisan migrate --force
+          php artisan config:cache
+          php artisan route:cache
+          php artisan view:cache
+          sudo systemctl restart nginx  # or restart your web server
+        EOF
