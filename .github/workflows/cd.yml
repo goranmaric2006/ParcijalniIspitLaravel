@@ -3,7 +3,7 @@ name: Deploy Laravel App to Ubuntu Server
 on:
   push:
     branches:
-      - main  # Trigger deploy only on push to main branch
+      - main  # Trigger deploy only on push to main
 
 jobs:
   deploy:
