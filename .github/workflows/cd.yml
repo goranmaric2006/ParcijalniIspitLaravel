@@ -3,7 +3,7 @@ name: Deploy Laravel App to Ubuntu Server
 on:
   push:
     branches:
-      - main  # Trigger deploy only on push to the main branch
+      - main  # Trigger deploy only on push to main branch
 
 jobs:
   deploy:
@@ -16,26 +16,23 @@ jobs:
     - name: Set up PHP
       uses: shivammathur/setup-php@v2
       with:
-        php-version: '8.3' # Ensure it matches your app's requirements
+        php-version: '8.1'
         extensions: mbstring, xml, curl, zip, bcmath
         coverage: none
 
-    - name: Install Composer
+    - name: Install Composer dependencies
       run: |
         curl -sS https://getcomposer.org/installer | php
-        sudo mv composer.phar /usr/local/bin/composer
+        php composer.phar install --no-interaction --prefer-dist
 
-    - name: Install Composer dependencies
-      run: composer install --no-interaction --prefer-dist
-
-    - name: Install sshpass
-      run: sudo apt-get update && sudo apt-get install -y sshpass
-
-    - name: Deploy to server
-      env:
-        SERVER_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
-      run: |
-        sshpass -p "$SERVER_PASSWORD" ssh -o StrictHostKeyChecking=no root@138.68.103.128 <<EOF
+    - name: Deploy to server using SSH with passphrase
+      uses: appleboy/ssh-action@v0.1.0
+      with:
+        host: ${{ secrets.SERVER_ADDRESS }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        passphrase: ${{ secrets.SSH_PASSPHRASE }}
+        script: |
           cd /var/www/html/app/
           git pull origin main
           composer install --no-interaction --prefer-dist
@@ -44,4 +41,3 @@ jobs:
           php artisan route:cache
           php artisan view:cache
           sudo systemctl restart apache2
-        EOF
