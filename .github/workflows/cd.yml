@@ -31,7 +31,7 @@ jobs:
         host: ${{ secrets.SERVER_ADDRESS }}
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
-        passphrase: ${{ secrets.SSH_PASSPHRASE }}
+        passphrase: ${{ secrets.SSH_PASSPHRASE }}  # Optional if key is passphrase-protected
         script: |
           cd /var/www/html/app/
           git pull origin main
@@ -41,3 +41,4 @@ jobs:
           php artisan route:cache
           php artisan view:cache
           sudo systemctl restart apache2
+      
