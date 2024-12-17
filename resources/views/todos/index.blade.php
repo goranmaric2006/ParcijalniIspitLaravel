@@ -4,7 +4,7 @@
 <div class="container">
     <h1>Todo List</h1>
 
-    <p style="font-size: 22px; font-weight: bold; color: red">CD pipeline test</p>
+    <p style="font-size: 22px; font-weight: bold; color: green">CD pipeline test</p>
 
     @if(session('success'))
         <div class="alert alert-success">
