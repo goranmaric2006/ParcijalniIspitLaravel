@@ -17,13 +17,13 @@ class TodoTest extends TestCase
         $user = User::create([
             'name' => 'Test User',
             'email' => 'test@test.com',
-            'password' => Hash::make('TestTest'), 
+            'password' => Hash::make('testtest'), 
         ]);
 
 
         $response = $this->postJson('/login', [
             'email' => 'test@test.com',
-            'password' => 'TestTest',
+            'password' => 'testtest',
         ]);
 
         $response = $this->actingAs($user)
