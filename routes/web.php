@@ -4,9 +4,9 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TodoController;
 use Illuminate\Support\Facades\Route;
 
-// Redirect root URL to login
+// Redirect root URL to the Todo index page
 Route::get('/', function () {
-    return redirect('/login');
+    return redirect()->route('todos.index');
 });
 
 Route::middleware('auth')->group(function () {
@@ -18,10 +18,12 @@ Route::middleware('auth')->group(function () {
     Route::delete('/todos/{todo}', [TodoController::class, 'destroy'])->name('todos.destroy');
 });
 
+// Remove the dashboard route or keep it if you need it for other purposes
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+// Profile routes
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -30,3 +32,4 @@ Route::middleware('auth')->group(function () {
 
 // Include authentication routes
 require __DIR__.'/auth.php';
+
