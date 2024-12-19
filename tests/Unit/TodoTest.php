@@ -2,31 +2,47 @@
 
 namespace Tests\Feature;
 
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
-use App\Models\Todo;
 
 class TodoTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
-    public function a_todo_item_can_be_created()
+    public function test_todo_can_be_created()
     {
-        // Arrange: Define the todo data
-        $todoData = [
-            'title' => 'Buy groceries',
-            'description' => 'Milk, Bread, and Eggs',
-        ];
+        // Create a user using the test credentials
+        $user = User::create([
+            'name' => 'Test User',
+            'email' => 'test@test.com',
+            'password' => Hash::make('TestTest'), // Store the password hashed
+        ]);
 
-        // Act: Make a POST request to create a todo item
-        $response = $this->postJson(route('todos.store'), $todoData);
+        // Log in as the created user
+        $response = $this->postJson('/login', [
+            'email' => 'test@test.com',
+            'password' => 'TestTest',
+        ]);
 
-        // Assert: Check if the todo item exists in the database
-        $response->assertStatus(201); // Assuming successful creation returns 201
+        // Extract the authentication token if using API (for example, with Sanctum)
+        // $token = $response->json('token'); // Uncomment if using Sanctum token
+        
+        // Make a POST request to create a Todo, using actingAs to authenticate
+        $response = $this->actingAs($user)
+                         ->postJson('/api/todos', [
+                             'title' => 'New Todo',
+                             'description' => 'This is a new todo item',
+                         ]);
+
+        // Assert that the status code is 201 (created)
+        $response->assertStatus(201);
+
+        // Optionally check if the todo item was created in the database
         $this->assertDatabaseHas('todos', [
-            'title' => 'Buy groceries',
-            'description' => 'Milk, Bread, and Eggs',
+            'title' => 'New Todo',
+            'description' => 'This is a new todo item',
         ]);
     }
 }
