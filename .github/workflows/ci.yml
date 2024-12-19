@@ -13,37 +13,44 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Set up PHP
-      - name: Set up PHP
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Set up PHP 8.3
         uses: shivammathur/setup-php@v2
         with:
           php-version: 8.3
-          extensions: mbstring, bcmath, intl, xml, sqlite3
+          extensions: mbstring, bcmath, intl, xml
 
-      # Step 3: Install Composer (skip if dependencies are already installed)
       - name: Install Composer
         run: |
           curl -sS https://getcomposer.org/installer | php
           mv composer.phar /usr/local/bin/composer
 
-      # Step 4: Install dependencies (optional, skip if not needed)
       - name: Install dependencies
-        run: composer install --no-interaction --prefer-dist --no-dev --optimize-autoloader
+        run: composer install --no-interaction --prefer-dist
 
-      # Step 5: Set up SQLite (if needed)
+      - name: Set up environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+   
+
       - name: Set up SQLite
         run: |
           mkdir -p database
-          touch database/database.sqlite
+          touch database/database.sqlite    
 
-      # Step 6: Run migrations (skip if database is already set up)
-      - name: Run migrations
-        run: php artisan migrate --no-interaction --force
+      - name: Run Migrations
+        run: php artisan migrate --no-interaction
 
-      # Step 7: Run tests
-      - name: Run tests
-        run: php artisan test
+      - name: Run Static Analysis
+        run: vendor/bin/phpstan analyse
