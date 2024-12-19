@@ -4,7 +4,7 @@ namespace Tests\Feature;
 
 use Tests\TestCase;
 
-class HomeRedirectTest extends TestCase
+class TodoTest extends TestCase
 {
     public function test_home_redirects_to_todos_page()
     {
