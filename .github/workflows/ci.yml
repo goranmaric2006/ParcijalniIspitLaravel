@@ -43,7 +43,7 @@ jobs:
           cp .env.example .env
           php artisan key:generate
    
-          
+
       - name: Set up SQLite
         run: |
           mkdir -p database
@@ -53,7 +53,7 @@ jobs:
         run: php artisan migrate --no-interaction
 
       - name: Run Tests
-        run: php artisan test --no-interaction
+        run: php artisan test
 
       - name: Run Static Analysis
         run: vendor/bin/phpstan analyse
