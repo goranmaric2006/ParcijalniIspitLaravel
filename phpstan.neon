@@ -1,0 +1,22 @@
+includes:
+  - ./vendor/nunomaduro/larastan/extension.neon
+
+parameters:
+  paths:
+    - app
+    - database
+    - routes
+
+  level: 0 # Use the strictest level (adjust as needed)
+
+  # Exclude directories that don't require analysis
+  excludePaths:
+    - storage/*
+    - bootstrap/cache/*
+    - database/migrations/*
+    - database/factories/*
+    - database/seeders/*
+
+
+  ignoreErrors:
+    - '#Undefined variable: \$this#'    
