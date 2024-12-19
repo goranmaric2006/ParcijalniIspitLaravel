@@ -13,15 +13,12 @@ Route::get('/', function () {
 Route::get('/todos', [TodoController::class, 'index'])->name('todos.index');
 Route::get('/todos/create', [TodoController::class, 'create'])->name('todos.create');
 Route::post('/todos', [TodoController::class, 'store'])->name('todos.store');
+Route::get('/todos/{todo}/edit', [TodoController::class, 'edit'])->name('todos.edit');
+Route::put('/todos/{todo}', [TodoController::class, 'update'])->name('todos.update');
+Route::delete('/todos/{todo}', [TodoController::class, 'destroy'])->name('todos.destroy');
 
-// Protected Todos routes (Requires authentication)
-Route::middleware('auth')->group(function () {
-    Route::get('/todos/{todo}/edit', [TodoController::class, 'edit'])->name('todos.edit');
-    Route::put('/todos/{todo}', [TodoController::class, 'update'])->name('todos.update');
-    Route::delete('/todos/{todo}', [TodoController::class, 'destroy'])->name('todos.destroy');
-});
 
-// Remove the dashboard route or keep it if you need it for other purposes
+
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
